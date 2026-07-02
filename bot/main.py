@@ -45,7 +45,9 @@ async def on_startup(bot: Bot):
         logging.warning(f"Could not verify bot admin status in channel {CHANNEL_ID}: {e}")
         
     # Start background workers
-    await start_worker(bot, n_workers=3)
+    # N_WORKERS: concurrent analyses. Each worker peaks ~1-1.5GB (torch +
+    # WeasyPrint), so keep 2 on a 4GB VPS.
+    await start_worker(bot, n_workers=int(os.getenv("N_WORKERS", 3)))
     
     if WEBHOOK_URL:
         await bot.set_webhook(WEBHOOK_URL)
