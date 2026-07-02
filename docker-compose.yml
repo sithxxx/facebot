@@ -17,6 +17,9 @@ services:
 
   bot:
     build: .
+    # Shared image: web reuses this exact build instead of building (and
+    # storing) a second identical 3GB image — halves disk and build time.
+    image: facebot-app:latest
     env_file: .env
     environment:
       - DATABASE_URL=postgresql+asyncpg://user:password@db:5432/facebot
@@ -31,7 +34,7 @@ services:
   # Reads the same DB the bot writes to. Not exposed to the host directly —
   # Caddy terminates TLS and reverse-proxies to it over the internal network.
   web:
-    build: .
+    image: facebot-app:latest
     env_file: .env
     environment:
       - DATABASE_URL=postgresql+asyncpg://user:password@db:5432/facebot
