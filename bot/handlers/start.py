@@ -1,6 +1,8 @@
+import os
+
 from aiogram import Router
 from aiogram.types import (
-    Message, InlineKeyboardMarkup, InlineKeyboardButton, WebAppInfo
+    Message, InlineKeyboardMarkup, InlineKeyboardButton, WebAppInfo, FSInputFile
 )
 from aiogram.filters import CommandStart, Command
 from aiogram.fsm.context import FSMContext
@@ -13,6 +15,9 @@ from bot.config import (
 )
 
 router = Router()
+
+# Example selfie shown after the welcome (correct face framing).
+EXAMPLE_PHOTO = "example_photo.jpg"
 
 
 def _prices_message() -> str:
@@ -51,7 +56,14 @@ async def cmd_start(message: Message, state: FSMContext):
     # 3. Follow up with the price list + photo call-to-action.
     await message.answer(_prices_message())
 
-    # 4. Set state
+    # 4. Example photo showing the expected face framing.
+    if os.path.exists(EXAMPLE_PHOTO):
+        await message.answer_photo(
+            photo=FSInputFile(EXAMPLE_PHOTO),
+            caption=ru.PHOTO_EXAMPLE_CAPTION,
+        )
+
+    # 5. Set state
     await state.set_state(AnalysisFlow.waiting_for_photo)
 
 

@@ -70,7 +70,9 @@ def main():
     dp = Dispatcher()
     
     # 6. Register throttling middleware
-    dp.message.middleware(ThrottlingMiddleware(rate_limit=60))
+    # 15s между фото: достаточно против спама очереди, но не наказывает за
+    # мгновенно отклонённое валидатором фото (раньше было 60с без счётчика).
+    dp.message.middleware(ThrottlingMiddleware(rate_limit=15))
     
     # 5. Register all routers
     dp.include_router(start.router)
