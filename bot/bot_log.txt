@@ -1,0 +1,4 @@
+Traceback (most recent call last):
+  File "/Users/s1thxxx/Desktop/facebot/bot/main.py", line 6, in <module>
+    from aiogram import Bot, Dispatcher
+ModuleNotFoundError: No module named 'aiogram'

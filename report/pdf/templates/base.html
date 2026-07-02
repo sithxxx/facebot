@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Facial Geometry Report</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap');
+
+        :root {
+            --bg-primary: #0D0D0D;
+            --bg-secondary: #111111;
+            --bg-card: #161616;
+            --text-primary: #E8E6DC;
+            --text-secondary: #9CA3AF;
+            --accent-gold: #F5A623;
+            --accent-green: #1D9E75;
+            --accent-purple: #8B5CF6;
+            --accent-blue: #4A90D9;
+            --accent-teal: #06B6D4;
+            --border: #2A2A2A;
+        }
+
+        @page {
+            size: A4;
+            margin: 0;
+            background: var(--bg-primary);
+        }
+
+        body {
+            font-family: 'Inter', 'Helvetica Neue', Arial, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            margin: 0;
+            padding: 0;
+            font-size: 12px;
+            line-height: 1.5;
+        }
+
+        /* One logical page. NO fixed height: a fixed 100vh made any slightly
+           overflowing content spill onto a mostly-blank extra page. Content is
+           sized to fit; the page break simply ends the sheet. */
+        .page-break {
+            page-break-after: always;
+            box-sizing: border-box;
+            padding: 34px 38px;
+            width: 100%;
+        }
+
+        .header,
+        .metric-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: baseline;
+            margin-bottom: 14px;
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 8px;
+        }
+
+        .metric-title {
+            font-size: 24px;
+            font-weight: 800;
+            margin: 0;
+        }
+
+        .page-num {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        .metric-body {
+            display: flex;
+            gap: 18px;
+            margin-bottom: 14px;
+        }
+
+        .photo-col { flex: 0 0 200px; }
+
+        .face-photo {
+            width: 200px;
+            height: 200px;
+            object-fit: cover;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+        }
+
+        .stats-col {
+            flex: 1;
+            background: var(--bg-card);
+            padding: 14px 16px;
+            border-radius: 8px;
+        }
+
+        .score-label, .stat-label {
+            font-size: 10px;
+            color: var(--text-secondary);
+            margin: 0 0 3px 0;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .score-value {
+            font-size: 32px;
+            font-weight: 800;
+            margin: 0 0 6px 0;
+            line-height: 1;
+        }
+
+        .score-bar {
+            width: 100%;
+            height: 7px;
+            margin-bottom: 12px;
+        }
+
+        .stats-row {
+            display: flex;
+            gap: 18px;
+            margin-bottom: 8px;
+        }
+        .stats-row > div { flex: 1; }
+
+        .stat-value {
+            font-size: 17px;
+            font-weight: 600;
+            margin: 0 0 2px 0;
+        }
+
+        .stat-formula {
+            font-size: 9.5px;
+            color: var(--text-secondary);
+            font-style: italic;
+            margin: 0;
+            line-height: 1.35;
+        }
+
+        .bell-curve-img {
+            width: 100%;
+            max-height: 96px;
+            object-fit: contain;
+            margin-top: 4px;
+        }
+
+        .analysis-text { margin-bottom: 12px; }
+
+        .analysis-text p {
+            margin: 0 0 8px 0;
+            font-size: 11.5px;
+            line-height: 1.5;
+        }
+
+        .headline {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .influence-box {
+            background: var(--bg-card);
+            padding: 10px 14px;
+            border-radius: 0 8px 8px 0;
+        }
+
+        .influence-box p {
+            margin: 0;
+            font-size: 11px;
+            line-height: 1.45;
+        }
+
+        .influence-label {
+            font-weight: 800;
+            margin: 0 0 4px 0;
+            font-size: 11px;
+            text-transform: uppercase;
+        }
+
+        /* Cover specific */
+        .cover-title {
+            font-size: 40px;
+            font-weight: 800;
+            text-align: center;
+            margin: 46px 0 36px 0;
+        }
+
+        .cover-photo-container {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .cover-photo {
+            width: 220px;
+            height: 220px;
+            object-fit: cover;
+            border-radius: 50%;
+            border: 4px solid var(--accent-purple);
+        }
+
+        .cover-score-box {
+            text-align: center;
+            background: var(--bg-card);
+            padding: 22px;
+            border-radius: 12px;
+            margin: 0 auto 26px auto;
+            max-width: 380px;
+        }
+
+        .cover-score-value {
+            font-size: 64px;
+            font-weight: 800;
+            margin: 8px 0;
+            color: var(--accent-gold);
+        }
+
+        .strengths-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+        }
+
+        .strength-badge {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            padding: 7px 14px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+            color: var(--accent-green);
+        }
+
+        /* Summary specific */
+        .radar-container {
+            text-align: center;
+            margin-bottom: 16px;
+        }
+
+        .radar-img {
+            max-width: 520px;
+            width: 100%;
+        }
+
+        /* Advice specific */
+        .advice-item {
+            background: var(--bg-card);
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 12px;
+            border-left: 3px solid var(--accent-blue);
+        }
+        .advice-item p {
+            margin: 6px 0 0 0;
+            font-size: 11.5px;
+            line-height: 1.45;
+        }
+        .advice-title {
+            font-size: 15px;
+            font-weight: 600;
+            margin: 0 0 6px 0;
+        }
+        .advice-cat {
+            font-size: 10px;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            display: inline-block;
+            background: var(--bg-secondary);
+            padding: 3px 7px;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    {% block content %}{% endblock %}
+</body>
+</html>

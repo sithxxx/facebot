@@ -1,0 +1,26 @@
+# Keep the build context small and secrets out of image layers.
+.git/
+.gitignore
+venv/
+.venv/
+env/
+__pycache__/
+**/__pycache__/
+*.py[cod]
+
+# Secrets — provided at runtime via env_file/host env, never baked in
+.env
+*.env
+
+# Dev-only / not needed at runtime
+face_analysis/ffhq_sample/
+face_analysis/tests/
+*.md
+graphify-out/
+recompute_norms.py
+lena.jpg
+test_img.jpg
+debug_landmarks.jpg
+bot_log.txt
+*.log
+.DS_Store

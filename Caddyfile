@@ -1,0 +1,7 @@
+# Automatic HTTPS via Let's Encrypt. {$DOMAIN} comes from the DOMAIN env var
+# (set it in .env, e.g. DOMAIN=rating.example.com). Caddy obtains and renews
+# the TLS certificate on its own — no manual certbot needed.
+{$DOMAIN} {
+	encode gzip
+	reverse_proxy web:8081
+}

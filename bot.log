@@ -1,0 +1,8 @@
+2026-06-12 18:47:52,366 | INFO | root | Starting bot in polling mode
+2026-06-12 18:47:52,407 | INFO | root | Database tables created/verified.
+2026-06-12 18:47:56,027 | INFO | root | Started 3 background workers.
+2026-06-12 18:47:56,027 | INFO | aiogram.dispatcher | Start polling
+2026-06-12 18:47:56,164 | INFO | aiogram.dispatcher | Run polling for bot @S1thFaceBot id=8893115933 - 'S1thFaceBot'
+2026-06-12 18:48:45,042 | INFO | aiogram.event | Update id=536449005 is handled. Duration 556 ms by bot id=8893115933
+2026-06-12 18:50:34,834 | INFO | root | Deleted temp file: /tmp/facebot/1898722572_1781265034262.jpg
+2026-06-12 18:50:34,834 | INFO | aiogram.event | Update id=536449006 is handled. Duration 766 ms by bot id=8893115933

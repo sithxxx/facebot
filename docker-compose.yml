@@ -1,0 +1,64 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: facebot
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+
+  bot:
+    build: .
+    env_file: .env
+    environment:
+      - DATABASE_URL=postgresql+asyncpg://user:password@db:5432/facebot
+      - REDIS_URL=redis://redis:6379
+    depends_on:
+      - db
+      - redis
+    command: sh -c "sleep 5 && PYTHONPATH=. python bot/main.py"
+    restart: unless-stopped
+
+  # Mini App leaderboard backend + static frontend (FastAPI/uvicorn).
+  # Reads the same DB the bot writes to. Not exposed to the host directly —
+  # Caddy terminates TLS and reverse-proxies to it over the internal network.
+  web:
+    build: .
+    env_file: .env
+    environment:
+      - DATABASE_URL=postgresql+asyncpg://user:password@db:5432/facebot
+    depends_on:
+      - db
+    command: sh -c "sleep 5 && PYTHONPATH=. uvicorn web.app:app --host 0.0.0.0 --port 8081"
+    expose:
+      - "8081"
+    restart: unless-stopped
+
+  # Reverse proxy with automatic HTTPS (Let's Encrypt). Reads DOMAIN from .env.
+  caddy:
+    image: caddy:2-alpine
+    depends_on:
+      - web
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      - DOMAIN=${DOMAIN}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+  caddy_data:
+  caddy_config:

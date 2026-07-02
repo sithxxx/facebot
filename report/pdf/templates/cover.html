@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="page-break">
+    <h1 class="cover-title">Анализ Геометрии Лица</h1>
+    
+    <div class="cover-photo-container">
+        <img src="{{ photo_b64 }}" class="cover-photo"/>
+    </div>
+    
+    <div class="cover-score-box">
+        <p class="score-label">ОБЩИЙ БАЛЛ</p>
+        <p class="cover-score-value">{{ "%.1f" | format(result.overall_score) }}</p>
+        <p class="score-label">ИЗ 10</p>
+    </div>
+
+    <div style="text-align: center; margin-bottom: 30px;">
+        <p class="stat-label">Распределение в популяции</p>
+        <img src="{{ bell_curve_b64 }}" style="width: 300px; margin-top: 10px;" />
+    </div>
+
+    <div style="text-align: center;">
+        <p class="stat-label" style="margin-bottom: 15px;">КЛЮЧЕВЫЕ СИЛЬНЫЕ СТОРОНЫ</p>
+        <ul class="strengths-list">
+            {% for strength in top_strengths_ru %}
+            <li class="strength-badge">{{ strength }}</li>
+            {% endfor %}
+        </ul>
+    </div>
+</div>
+{% endblock %}

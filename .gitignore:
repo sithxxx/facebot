@@ -1,0 +1,9 @@
+venv/
+__pycache__/
+*.pyc
+.env
+*.pdf
+ffhq_sample/
+/tmp/
+.DS_Store
+node_modules/

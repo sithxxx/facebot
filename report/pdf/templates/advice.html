@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="page-break">
+    <div class="header">
+        <h2 class="metric-title">Рекомендации по Улучшению</h2>
+    </div>
+
+    <div style="margin-bottom: 30px;">
+        <p>Эти рекомендации основаны на метриках, показавших наибольший потенциал для визуального баланса. Небольшие изменения в стиле и ракурсах могут значительно улучшить общую гармонию.</p>
+    </div>
+
+    {% for item in advice_items %}
+    <div class="advice-item">
+        <h3 class="advice-title">{{ item.metric_name_ru }}</h3>
+        <span class="advice-cat">{{ item.category }}</span>
+        <p>{{ item.advice_text }}</p>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

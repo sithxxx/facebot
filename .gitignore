@@ -1,0 +1,31 @@
+# Secrets — NEVER commit
+.env
+*.env
+!.env.example
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+
+# Virtualenv
+venv/
+.venv/
+env/
+
+# OS / editor
+.DS_Store
+*.swp
+.idea/
+.vscode/
+
+# Runtime / temp artifacts
+/tmp/
+*.log
+bot_log.txt
+debug_landmarks.jpg
+graphify-out/
+
+# Large data samples (regenerate via scripts)
+face_analysis/ffhq_sample/

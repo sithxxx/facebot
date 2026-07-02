@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="page-break">
+  <div class="metric-header">
+    <h2 class="metric-title" style="color: {{ score_color }}">{{ metric.name_ru }}</h2>
+    <span class="page-num">Метрика {{ "%02d" | format(metric_num) }} / {{ total_metrics }}</span>
+  </div>
+
+  <div class="metric-body">
+    <div class="photo-col">
+      <img src="{{ photo_b64 }}" class="face-photo"/>
+    </div>
+    <div class="stats-col">
+      <p class="score-label">Балл метрики</p>
+      <p class="score-value" style="color: {{ score_color }}">{{ "%.2f" | format(metric.score) }}</p>
+      <img src="{{ score_bar_b64 }}" class="score-bar"/>
+
+      <div class="stats-row">
+        <div>
+          <p class="stat-label">Ваш показатель</p>
+          <p class="stat-value">{{ "%.4f" | format(metric.raw_value) }}</p>
+        </div>
+        <div>
+          <p class="stat-label">Норма</p>
+          <p class="stat-value">{{ "%.4f" | format(metric.norm_value) }}</p>
+        </div>
+      </div>
+      <p class="stat-formula">{{ metric.description }}</p>
+    </div>
+  </div>
+
+  <div style="margin-bottom: 12px;">
+    <p class="stat-label">Отклонение в популяции</p>
+    <img src="{{ bell_curve_b64 }}" class="bell-curve-img"/>
+  </div>
+
+  <div class="analysis-text">
+    {{ ai_body | safe }}
+  </div>
+
+  <div class="influence-box" style="border-left: 3px solid {{ score_color }}">
+    <p class="influence-label">ВЛИЯНИЕ</p>
+    <p>{{ ai_influence }}</p>
+  </div>
+</div>
+{% endblock %}
