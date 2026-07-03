@@ -1,8 +1,9 @@
 import os
 
-from aiogram import Router
+from aiogram import Router, F
 from aiogram.types import (
-    Message, InlineKeyboardMarkup, InlineKeyboardButton, WebAppInfo, FSInputFile
+    Message, InlineKeyboardMarkup, InlineKeyboardButton, WebAppInfo, FSInputFile,
+    ReplyKeyboardMarkup, KeyboardButton,
 )
 from aiogram.filters import CommandStart, Command
 from aiogram.fsm.context import FSMContext
@@ -18,6 +19,17 @@ router = Router()
 
 # Example selfie shown after the welcome (correct face framing).
 EXAMPLE_PHOTO = "example_photo.jpg"
+
+# Persistent reply-keyboard button that restarts the flow (same as /start).
+BTN_RESTART = "🚀 Новый разбор"
+
+
+def _restart_keyboard() -> ReplyKeyboardMarkup:
+    return ReplyKeyboardMarkup(
+        keyboard=[[KeyboardButton(text=BTN_RESTART)]],
+        resize_keyboard=True,
+        is_persistent=True,
+    )
 
 
 def _prices_message() -> str:
@@ -53,8 +65,9 @@ async def cmd_start(message: Message, state: FSMContext):
     #    description isn't truncated by the 1024-char caption limit.
     await message.answer(ru.WELCOME, reply_markup=_leaderboard_keyboard())
 
-    # 3. Follow up with the price list + photo call-to-action.
-    await message.answer(_prices_message())
+    # 3. Follow up with the price list + photo call-to-action, and attach the
+    #    persistent "restart" reply keyboard.
+    await message.answer(_prices_message(), reply_markup=_restart_keyboard())
 
     # 4. Example photo showing the expected face framing.
     if os.path.exists(EXAMPLE_PHOTO):
@@ -65,6 +78,12 @@ async def cmd_start(message: Message, state: FSMContext):
 
     # 5. Set state
     await state.set_state(AnalysisFlow.waiting_for_photo)
+
+
+@router.message(F.text == BTN_RESTART)
+async def btn_restart(message: Message, state: FSMContext):
+    """The persistent keyboard button behaves exactly like /start."""
+    await cmd_start(message, state)
 
 
 @router.message(Command("leaderboard_optout"))

@@ -11,7 +11,7 @@ OPENAI_TEMPERATURE = float(os.getenv("OPENAI_TEMPERATURE", 0.7))
 TELEGRAM_BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
 DATABASE_URL = os.getenv("DATABASE_URL")
 REDIS_URL = os.getenv("REDIS_URL", "redis://localhost:6379")
-PRICE_STARS = int(os.getenv("PRICE_STARS", 250))
+PRICE_STARS = int(os.getenv("PRICE_STARS", 150))
 MAX_QUEUE_SIZE = int(os.getenv("MAX_QUEUE_SIZE", 100))
 TEMP_DIR = os.getenv("TEMP_DIR", "/tmp/facebot")
 WEBHOOK_URL = os.getenv("WEBHOOK_URL")
@@ -28,7 +28,7 @@ CARD_PRICE_RUB = int(os.getenv("CARD_PRICE_RUB", 299))
 
 # Crypto (CryptoBot)
 CRYPTOBOT_TOKEN = os.getenv("CRYPTOBOT_TOKEN")
-CRYPTO_PRICE_USDT = float(os.getenv("CRYPTO_PRICE_USDT", 3.5))
+CRYPTO_PRICE_USDT = float(os.getenv("CRYPTO_PRICE_USDT", 2.5))
 
 # Channel subscription
 CHANNEL_ID = os.getenv("CHANNEL_ID", "@twitch_s1thxxx")

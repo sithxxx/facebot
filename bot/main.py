@@ -31,6 +31,12 @@ async def on_startup(bot: Bot):
 
     # 2. Create TEMP_DIR if not exists
     os.makedirs(TEMP_DIR, exist_ok=True)
+
+    # Register the command menu (the "Menu" button next to the input field).
+    from aiogram.types import BotCommand
+    await bot.set_my_commands([
+        BotCommand(command="start", description="🚀 Запустить бота / новый разбор"),
+    ])
     
     # 3. Init DB
     await init_db()
