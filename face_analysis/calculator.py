@@ -45,6 +45,30 @@ METRIC_INFO = {
     "brow_height": ("Высота бровей", "Расстояние от бровей до век"),
 }
 
+# English display names/descriptions (used for lang="en" reports).
+METRIC_INFO_EN = {
+    "face_symmetry": ("Face Symmetry", "Evenness of the left and right sides of the face"),
+    "face_proportions": ("Face Proportions", "Face height to cheekbone width ratio"),
+    "vertical_balance": ("Vertical Balance", "Balance of the middle and lower thirds of the face"),
+    "jaw_cheek_balance": ("Jaw-Cheek Balance", "Cheekbone to jaw width ratio"),
+    "eye_size": ("Eye Size", "Eye size relative to face width"),
+    "eye_spacing": ("Eye Spacing", "Distance between the inner eye corners"),
+    "eye_tilt": ("Eye Tilt", "Eye tilt angle (hunter eyes)"),
+    "nose_width": ("Nose Width", "Relative width of the nose wings"),
+    "mouth_width": ("Mouth Width", "Mouth width relative to cheekbone width"),
+    "nose_length": ("Nose Length", "Nose length relative to face height"),
+    "chin_length": ("Chin Length", "Relative chin length"),
+    "chin_contour": ("Chin Contour", "Jaw angle and shape"),
+    "nose_to_mouth_ratio": ("Nose-Mouth Ratio", "Nose width to mouth width proportion"),
+    "biocular_width": ("Biocular Width", "Distance between the outer eye corners"),
+    "forehead_width": ("Forehead Width", "Relative forehead width"),
+    "lip_fullness": ("Lip Fullness", "Total lip height to mouth width"),
+    "lip_proportions": ("Lip Proportions", "Upper to lower lip ratio"),
+    "jaw_to_mouth": ("Jaw to Mouth", "Jaw width to mouth width ratio"),
+    "eye_shape": ("Eye Shape", "Eye height to width ratio"),
+    "brow_height": ("Brow Height", "Distance from brows to eyelids"),
+}
+
 def analyze_face(landmarks: FaceLandmarks, gender: str = "male", photo_path: str = None) -> FullAnalysisResult:
     """
     Runs all 20 metric functions, scores each one,
@@ -94,8 +118,9 @@ def analyze_face(landmarks: FaceLandmarks, gender: str = "male", photo_path: str
             score, sigma = raw_to_score(raw_val, name, gender)
             
             name_ru, description = METRIC_INFO[name]
+            name_en, description_en = METRIC_INFO_EN[name]
             norm_val = NORMS[gender].get(name, {}).get("median", 0.0)
-            
+
             results.append(MetricResult(
                 name=name,
                 name_ru=name_ru,
@@ -103,7 +128,9 @@ def analyze_face(landmarks: FaceLandmarks, gender: str = "male", photo_path: str
                 norm_value=norm_val,
                 sigma_deviation=sigma,
                 score=score,
-                description=description
+                description=description,
+                name_en=name_en,
+                description_en=description_en,
             ))
             
             weight = WEIGHTS.get(name, 1.0)

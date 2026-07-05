@@ -82,10 +82,64 @@ CRYPTO_PAID = "✅ Оплата в крипте получена! Начинаю
 
 # Tier messages — used in get_tier_position_message()
 TIER_MESSAGE_TEMPLATE = (
-    "{emoji} <b>Твой ранг: {name}</b> — {name_ru}\n"
+    "{emoji} <b>Твой ранг: {name}</b> — {name_local}\n"
     "<i>{psl_range} по шкале PSL</i>\n\n"
     "{percentile}\n\n"
-    "{description_ru}\n\n"
-    "💡 <b>Как улучшить:</b>\n{how_to_improve_ru}\n\n"
+    "{description}\n\n"
+    "💡 <b>Как улучшить:</b>\n{how_to_improve}\n\n"
     "📊 Твой итоговый балл: <b>{score}/10</b>"
 )
+
+PRICES_METHOD_STARS = "⭐ {price} Telegram Stars"
+PRICES_METHOD_CARD = "💳 {price} ₽ картой"
+PRICES_METHOD_CRYPTO = "₿ {price} USDT криптовалютой"
+
+PDF_CAPTION = "🎉 Твой персональный разбор готов!"
+ANALYSIS_ERROR = "😔 Произошла ошибка при анализе."
+
+PAY_BTN_STARS = "⭐ {price} Telegram Stars"
+PAY_BTN_CARD = "💳 {price} ₽ картой"
+PAY_BTN_CRYPTO = "₿ {price} USDT крипта"
+PAY_BTN_CANCEL = "Отмена"
+PAYMENT_CANCELLED = "Оплата отменена."
+
+INVOICE_TITLE = "Разбор лица — полный анализ"
+INVOICE_DESCRIPTION = "Подробный PDF с математическим разбором 20 метрик лица"
+INVOICE_LABEL = "Анализ лица"
+CRYPTO_PAY_BUTTON = "Оплатить USDT"
+
+LANGUAGE_PROMPT = "🌐 Выбери язык / Choose your language:"
+LANGUAGE_SET = "✅ Язык установлен: русский"
+
+BTN_RESTART = "🚀 Новый разбор"
+
+THROTTLE_MSG = "⏱ Слишком часто. Отправь фото через {sec} сек."
+PROMO_ENDED = "Акция завершена — анализ теперь платный"
+
+# PDF template labels
+PDF_T = {
+    "cover_title": "Анализ Геометрии Лица",
+    "overall_score": "ОБЩИЙ БАЛЛ",
+    "out_of_10": "ИЗ 10",
+    "population_distribution": "Распределение в популяции",
+    "key_strengths": "КЛЮЧЕВЫЕ СИЛЬНЫЕ СТОРОНЫ",
+    "summary_title": "Сводка и Общее Впечатление",
+    "geometry_profile": "Профиль геометрии лица",
+    "overall_impression": "ОБЩЕЕ ВПЕЧАТЛЕНИЕ",
+    "metric_label": "Метрика",
+    "metric_score": "Балл метрики",
+    "your_value": "ВАШ ПОКАЗАТЕЛЬ",
+    "norm": "НОРМА",
+    "deviation": "Отклонение в популяции",
+    "influence": "ВЛИЯНИЕ",
+    "advice_title": "Рекомендации по Улучшению",
+    "advice_intro": (
+        "Эти рекомендации основаны на метриках, показавших наибольший потенциал "
+        "для визуального баланса. Небольшие изменения в стиле и ракурсах могут "
+        "значительно улучшить общую гармонию."
+    ),
+}
+
+GENDER_MALE = "👨 Мужской"
+GENDER_FEMALE = "👩 Женский"
+GENDER_CHOSEN = "Выбран пол: {gender}"

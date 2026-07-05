@@ -14,18 +14,20 @@ def subscription_keyboard() -> InlineKeyboardMarkup:
         ]
     )
 
-def payment_choice_keyboard(stars_price: int, card_price_rub: int, crypto_price_usdt: float) -> InlineKeyboardMarkup:
+def payment_choice_keyboard(stars_price: int, card_price_rub: int, crypto_price_usdt: float, lang: str = "ru") -> InlineKeyboardMarkup:
     """
     Payment method selection + cancel. Stars are always available; the card
     and crypto buttons appear only when their provider tokens are configured —
     a visible button that errors out is worse than no button.
     """
     from bot.config import CARD_PROVIDER_TOKEN, CRYPTOBOT_TOKEN
+    from bot.locales import get_locale
+    L = get_locale(lang)
 
-    rows = [[InlineKeyboardButton(text=f"⭐ {stars_price} Telegram Stars", callback_data="pay:stars")]]
+    rows = [[InlineKeyboardButton(text=L.PAY_BTN_STARS.format(price=stars_price), callback_data="pay:stars")]]
     if CARD_PROVIDER_TOKEN:
-        rows.append([InlineKeyboardButton(text=f"💳 {card_price_rub} ₽ картой", callback_data="pay:card")])
+        rows.append([InlineKeyboardButton(text=L.PAY_BTN_CARD.format(price=card_price_rub), callback_data="pay:card")])
     if CRYPTOBOT_TOKEN:
-        rows.append([InlineKeyboardButton(text=f"₿ {crypto_price_usdt} USDT крипта", callback_data="pay:crypto")])
-    rows.append([InlineKeyboardButton(text="Отмена", callback_data="pay:cancel")])
+        rows.append([InlineKeyboardButton(text=L.PAY_BTN_CRYPTO.format(price=crypto_price_usdt), callback_data="pay:crypto")])
+    rows.append([InlineKeyboardButton(text=L.PAY_BTN_CANCEL, callback_data="pay:cancel")])
     return InlineKeyboardMarkup(inline_keyboard=rows)

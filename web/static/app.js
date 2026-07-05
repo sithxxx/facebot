@@ -26,7 +26,7 @@
     const sep = path.includes("?") ? "&" : "?";
     const res = await fetch(path + sep + "gender=" + gender, { headers: { Authorization: AUTH } });
     if (!res.ok) {
-      const detail = res.status === 401 ? "Откройте приложение через бота" : "Ошибка " + res.status;
+      const detail = res.status === 401 ? "Open the app through the bot" : "Error " + res.status;
       throw new Error(detail);
     }
     return res.json();
@@ -67,7 +67,7 @@
       const row = el("div", "row" + (myId && e.user_id === myId ? " me" : ""));
       row.append(
         el("div", "rank" + (e.rank <= 3 ? " top" : ""), "#" + e.rank),
-        el("div", "name", e.name || "Аноним"),
+        el("div", "name", e.name || "Anonymous"),
         el("div", "score", fmtScore(e.score))
       );
       list.appendChild(row);
@@ -85,12 +85,12 @@
   }
 
   async function viewGlobal() {
-    showState("Загрузка…");
+    showState("Loading…");
     try {
       const data = await api("/api/leaderboard/global");
       content.innerHTML = "";
       if (!data.entries.length) {
-        showState("Пока никого. Будь первым!");
+        showState("Nobody here yet. Be the first!");
       } else {
         renderRows(data.entries, data.me ? data.me.user_id : null, content);
       }
@@ -101,7 +101,7 @@
   }
 
   async function viewTiers() {
-    showState("Загрузка…");
+    showState("Loading…");
     try {
       const data = await api("/api/leaderboard/tiers");
       const wrap = el("div", "tiers");
@@ -110,7 +110,7 @@
         card.style.setProperty("--tier-color", t.color);
         card.appendChild(tierPhoto(t));
         const info = el("div", "tier-info");
-        info.appendChild(el("div", "tier-name", `${t.name} · ${t.name_ru}`));
+        info.appendChild(el("div", "tier-name", t.name === t.name_full ? t.name : `${t.name} · ${t.name_full}`));
         info.appendChild(el("div", "tier-sub", `PSL ${t.psl_range} · ${t.percentile}`));
         card.appendChild(info);
         card.appendChild(el("div", "tier-arrow", "›"));
@@ -125,11 +125,11 @@
   }
 
   async function viewTierDetail(slug) {
-    showState("Загрузка…");
+    showState("Loading…");
     try {
       const data = await api("/api/leaderboard/tier/" + encodeURIComponent(slug));
       const head = el("div", "detail-head");
-      const back = el("button", "back-btn", "‹ Назад");
+      const back = el("button", "back-btn", "‹ Back");
       back.addEventListener("click", () => { haptic(); viewTiers(); });
       head.appendChild(back);
       const title = el("div", "detail-title");
@@ -139,7 +139,7 @@
       content.innerHTML = "";
       content.appendChild(head);
       if (!data.entries.length) {
-        content.appendChild(el("div", "state", "В этом уровне пока никого."));
+        content.appendChild(el("div", "state", "Nobody in this tier yet."));
         return;
       }
       renderRows(data.entries, null, content);

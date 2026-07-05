@@ -3,7 +3,7 @@ from aiogram.types import CallbackQuery
 from aiogram.fsm.context import FSMContext
 
 from bot.states.user_states import AnalysisFlow
-from bot.locales.ru import PAYMENT_CHOICE, PHOTO_PROMPT
+from bot.locales import get_locale
 from bot.keyboards.subscription_kb import payment_choice_keyboard
 from bot.config import PRICE_STARS, CARD_PRICE_RUB, CRYPTO_PRICE_USDT
 
@@ -17,16 +17,16 @@ async def process_subscription_check(callback: CallbackQuery, bot: Bot, state: F
     Every analysis is paid now — route the user to the payment choice
     (or back to the photo prompt if there is no pending analysis).
     """
-    await callback.answer("Акция завершена — анализ теперь платный")
-
     data = await state.get_data()
+    L = get_locale(data.get("lang", "ru"))
+    await callback.answer(L.PROMO_ENDED)
     if data.get("photo_path") and data.get("gender"):
         await state.set_state(AnalysisFlow.waiting_for_payment)
         await callback.message.edit_text(
-            text=PAYMENT_CHOICE,
-            reply_markup=payment_choice_keyboard(PRICE_STARS, CARD_PRICE_RUB, CRYPTO_PRICE_USDT),
+            text=L.PAYMENT_CHOICE,
+            reply_markup=payment_choice_keyboard(PRICE_STARS, CARD_PRICE_RUB, CRYPTO_PRICE_USDT, data.get("lang", "ru")),
             parse_mode="HTML"
         )
     else:
         await state.set_state(AnalysisFlow.waiting_for_photo)
-        await callback.message.edit_text(PHOTO_PROMPT)
+        await callback.message.edit_text(L.PHOTO_PROMPT)

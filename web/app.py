@@ -53,13 +53,13 @@ def _tier_public(tier, gender: str) -> dict:
     return {
         "slug": tier.slug,
         "name": tier.name,
-        "name_ru": tier.name_ru,
+        "name_full": tier.name_en,
         "photo": f"/tiers/{gender}/{tier.slug}.jpg",
         "color": tier.color_hex,
         "psl_range": tier.psl_range,
         "score_min": tier.score_min,
         "score_max": tier.score_max,
-        "percentile": tier.percentile,
+        "percentile": tier.percentile_en,
     }
 
 

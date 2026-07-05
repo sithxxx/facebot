@@ -35,7 +35,8 @@ async def on_startup(bot: Bot):
     # Register the command menu (the "Menu" button next to the input field).
     from aiogram.types import BotCommand
     await bot.set_my_commands([
-        BotCommand(command="start", description="🚀 Запустить бота / новый разбор"),
+        BotCommand(command="start", description="🚀 Новый разбор / New analysis"),
+        BotCommand(command="language", description="🌐 Язык / Language"),
     ])
     
     # 3. Init DB

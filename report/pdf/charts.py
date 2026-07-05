@@ -30,9 +30,10 @@ def _fig_to_base64(fig) -> str:
     buf.seek(0)
     return "data:image/png;base64," + base64.b64encode(buf.read()).decode('utf-8')
 
-def generate_radar_chart(metrics: list[MetricResult]) -> str:
+def generate_radar_chart(metrics: list[MetricResult], lang: str = "ru") -> str:
     """Creates a radar/spider chart of all 20 metric scores."""
-    labels = [m.name_ru for m in metrics]
+    is_en = (lang or "").startswith("en")
+    labels = [(m.name_en if is_en and m.name_en else m.name_ru) for m in metrics]
     scores = [m.score for m in metrics]
     num_vars = len(labels)
     

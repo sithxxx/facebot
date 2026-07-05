@@ -2,16 +2,16 @@
 {% block content %}
 <div class="page-break">
     <div class="header">
-        <h2 class="metric-title">Сводка и Общее Впечатление</h2>
+        <h2 class="metric-title">{{ t.summary_title }}</h2>
     </div>
 
     <div class="radar-container">
-        <p class="stat-label" style="margin-bottom: 10px;">Профиль геометрии лица</p>
+        <p class="stat-label" style="margin-bottom: 10px;">{{ t.geometry_profile }}</p>
         <img src="{{ radar_chart_b64 }}" class="radar-img" />
     </div>
 
     <div class="influence-box" style="border-left: 3px solid var(--accent-gold);">
-        <p class="influence-label" style="color: var(--accent-gold);">ОБЩЕЕ ВПЕЧАТЛЕНИЕ</p>
+        <p class="influence-label" style="color: var(--accent-gold);">{{ t.overall_impression }}</p>
         <p style="font-size: 12px; line-height: 1.55;">{{ overall_summary }}</p>
     </div>
 </div>

@@ -24,6 +24,8 @@ class User(Base):
     best_at: Mapped[datetime | None] = mapped_column(DateTime, default=None)
     gender: Mapped[str | None] = mapped_column(String(8), default=None)
     show_on_leaderboard: Mapped[bool] = mapped_column(Boolean, default=True)
+    # Interface language: "ru" | "en". None = not chosen yet (picker shown).
+    lang: Mapped[str | None] = mapped_column(String(4), default=None)
 
 class AnalysisJob(Base):
     __tablename__ = "analysis_jobs"

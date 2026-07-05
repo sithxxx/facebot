@@ -111,6 +111,19 @@ async def update_best_score(user_id: int, score: float, gender: str | None = Non
         return False
 
 
+async def set_user_lang(user_id: int, lang: str):
+    async with async_session() as session:
+        user = await session.get(User, user_id)
+        if user:
+            user.lang = lang
+            await session.commit()
+
+
+async def get_user_lang(user_id: int) -> str | None:
+    user = await get_user(user_id)
+    return user.lang if user else None
+
+
 async def set_leaderboard_visibility(user_id: int, visible: bool):
     async with async_session() as session:
         user = await session.get(User, user_id)

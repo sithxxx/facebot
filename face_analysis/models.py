@@ -37,6 +37,9 @@ class MetricResult:
     sigma_deviation: float
     score: float
     description: str
+    # English display fields (defaults keep old stored dicts loadable)
+    name_en: str = ""
+    description_en: str = ""
 
 @dataclass
 class FullAnalysisResult:

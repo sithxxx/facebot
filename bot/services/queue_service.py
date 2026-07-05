@@ -7,7 +7,7 @@ from bot.config import MAX_QUEUE_SIZE
 from bot.services.analysis_service import run_analysis
 from bot.services.file_service import delete_file, get_temp_path
 from bot.database import repository
-from bot.locales import ru
+from bot.locales import get_locale
 
 # Global queue
 analysis_queue = asyncio.Queue(maxsize=MAX_QUEUE_SIZE)
@@ -50,26 +50,24 @@ async def _process_job(job: dict, bot: Bot):
     chat_id = job['chat_id']
     photo_path = job['photo_path']
     gender = job['gender']
+    lang = job.get('lang', 'ru')
     message_id = job['message_id']
     job_id = job.get('db_job_id')
-    
+    L = get_locale(lang)
+
     try:
         # Update DB status
         if job_id:
             await repository.update_job_status(job_id, "processing")
-            
-        # Edit status message: "🔍 Обнаруживаю точки лица..."
-        await bot.edit_message_text(chat_id=chat_id, message_id=message_id, text=ru.STATUS_DETECTING)
-        
+
+        await bot.edit_message_text(chat_id=chat_id, message_id=message_id, text=L.STATUS_DETECTING)
+
         output_pdf_path = get_temp_path(user_id, ".pdf")
-        
-        # Edit status message: "📐 Считаю метрики..."
-        # (Inside run_analysis, we can't easily yield progress without making it a generator, 
-        # so we'll just update once before calling run_analysis)
-        await bot.edit_message_text(chat_id=chat_id, message_id=message_id, text=ru.STATUS_METRICS + "\n" + ru.STATUS_GENERATING)
-        
+
+        await bot.edit_message_text(chat_id=chat_id, message_id=message_id, text=L.STATUS_METRICS + "\n" + L.STATUS_GENERATING)
+
         # Run pipeline
-        final_pdf_path, analysis_result = await run_analysis(photo_path, gender, output_pdf_path)
+        final_pdf_path, analysis_result = await run_analysis(photo_path, gender, output_pdf_path, lang)
         
         logging.info(
             f"Analysis complete — user={job['user_id']} | "
@@ -79,24 +77,23 @@ async def _process_job(job: dict, bot: Bot):
             f"ml_weight={analysis_result.ml_weight}"
         )
         
-        # Edit status message: "📄 Создаю PDF..."
-        await bot.edit_message_text(chat_id=chat_id, message_id=message_id, text=ru.STATUS_PDF)
-        
+        await bot.edit_message_text(chat_id=chat_id, message_id=message_id, text=L.STATUS_PDF)
+
         # Send PDF to user
         pdf_file = FSInputFile(final_pdf_path, filename="Face_Analysis_Report.pdf")
         await bot.send_document(
-            chat_id=chat_id, 
+            chat_id=chat_id,
             document=pdf_file,
-            caption="🎉 Твой персональный разбор готов!"
+            caption=L.PDF_CAPTION
         )
-        
+
         # Send tier message
         from bot.services.tier_service import get_tier_position_message
-        tier_message = get_tier_position_message(analysis_result.overall_score, gender)
+        tier_message = get_tier_position_message(analysis_result.overall_score, gender, lang)
         await bot.send_message(chat_id=chat_id, text=tier_message, parse_mode="HTML")
-        
+
         # Final message update
-        await bot.edit_message_text(chat_id=chat_id, message_id=message_id, text=ru.STATUS_DONE)
+        await bot.edit_message_text(chat_id=chat_id, message_id=message_id, text=L.STATUS_DONE)
         
         # Save completed job to DB
         if job_id:
@@ -121,21 +118,20 @@ async def _process_job(job: dict, bot: Bot):
                 f"{'improved best' if improved else 'no change'}"
             )
 
-    except Exception as e:
-        logging.error(f"JOB FAILED for user {job['user_id']}: {e}")
-        logging.error(traceback.format_exc())
-        await bot.send_message(job['chat_id'], "😔 Произошла ошибка при анализе.")
-        
+    # ValueError carries validation codes (no_face, too_blurry, ...) and MUST
+    # come before the broad Exception — the old order made this branch dead
+    # code and users always saw the generic error.
     except ValueError as e:
         error_str = str(e)
-        user_msg = ru.PHOTO_ERRORS.get(error_str, ru.ERROR_GENERAL)
-        await bot.edit_message_text(chat_id=chat_id, message_id=message_id, text=f"❌ Ошибка: {user_msg}")
+        user_msg = L.PHOTO_ERRORS.get(error_str, L.ERROR_GENERAL)
+        await bot.edit_message_text(chat_id=chat_id, message_id=message_id, text=f"❌ {user_msg}")
         if job_id:
             await repository.update_job_status(job_id, "failed", error_msg=error_str)
-            
+
     except Exception as e:
-        logging.error(f"Error processing job for user {user_id}: {e}", exc_info=True)
-        await bot.edit_message_text(chat_id=chat_id, message_id=message_id, text=ru.ERROR_GENERAL)
+        logging.error(f"JOB FAILED for user {user_id}: {e}")
+        logging.error(traceback.format_exc())
+        await bot.edit_message_text(chat_id=chat_id, message_id=message_id, text=L.ANALYSIS_ERROR)
         if job_id:
             await repository.update_job_status(job_id, "failed", error_msg=str(e))
             

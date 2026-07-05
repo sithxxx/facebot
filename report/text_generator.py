@@ -15,6 +15,20 @@ client = openai.OpenAI(
     base_url=OPENAI_BASE_URL,
 )
 
+# Appended to every system prompt when the user language is English. The
+# prompts themselves are written in English and instruct Russian output — a
+# final override wins without rewriting 450 lines of prompt text.
+EN_OVERRIDE = (
+    "\n\nIMPORTANT LANGUAGE OVERRIDE: Ignore all earlier instructions about "
+    "writing in Russian. Write the ENTIRE text in natural ENGLISH, second "
+    "person. Where a bold lead word \'ВЛИЯНИЕ\' was requested, use \'IMPACT\' "
+    "instead. Field names in any JSON output stay exactly as specified."
+)
+
+
+def _sys(prompt: str, lang: str) -> str:
+    return prompt + EN_OVERRIDE if (lang or "").startswith("en") else prompt
+
 def _call_openai_with_retry(messages: list, max_retries: int = 3, response_format=None, max_tokens: int | None = None) -> str:
     """Helper to call OpenAI API with exponential backoff on RateLimitError."""
     delays = [2, 4, 8]
@@ -56,20 +70,32 @@ def _call_openai_with_retry(messages: list, max_retries: int = 3, response_forma
             logging.error(f"Unexpected error calling OpenAI: {e}")
             raise e
 
-def generate_metric_text(metric: MetricResult, gender: str) -> str:
+def generate_metric_text(metric: MetricResult, gender: str, lang: str = "ru") -> str:
     """
     Generates 3-paragraph personalized analysis for a single metric.
     """
-    system_prompt = METRIC_PROMPTS.get(metric.name, DEFAULT_METRIC_PROMPT)
-    
-    user_prompt = (
-        f"Пол: {gender}\n"
-        f"Метрика: {metric.name_ru}\n"
-        f"Результат: {metric.raw_value:.4f}\n"
-        f"Норма: {metric.norm_value:.4f}\n"
-        f"Отклонение от нормы (в сигмах): {metric.sigma_deviation:.2f}\n"
-        f"Балл (от 1 до 10): {metric.score:.2f}\n"
-    )
+    system_prompt = _sys(METRIC_PROMPTS.get(metric.name, DEFAULT_METRIC_PROMPT), lang)
+
+    is_en = (lang or "").startswith("en")
+    metric_name = metric.name_en if is_en and metric.name_en else metric.name_ru
+    if is_en:
+        user_prompt = (
+            f"Gender: {gender}\n"
+            f"Metric: {metric_name}\n"
+            f"Result: {metric.raw_value:.4f}\n"
+            f"Norm: {metric.norm_value:.4f}\n"
+            f"Deviation from the norm (in sigmas): {metric.sigma_deviation:.2f}\n"
+            f"Score (1 to 10): {metric.score:.2f}\n"
+        )
+    else:
+        user_prompt = (
+            f"Пол: {gender}\n"
+            f"Метрика: {metric.name_ru}\n"
+            f"Результат: {metric.raw_value:.4f}\n"
+            f"Норма: {metric.norm_value:.4f}\n"
+            f"Отклонение от нормы (в сигмах): {metric.sigma_deviation:.2f}\n"
+            f"Балл (от 1 до 10): {metric.score:.2f}\n"
+        )
     
     messages = [
         {"role": "system", "content": system_prompt},
@@ -80,6 +106,14 @@ def generate_metric_text(metric: MetricResult, gender: str) -> str:
         return _call_openai_with_retry(messages)
     except Exception:
         # Fallback template if API fails
+        if is_en:
+            return (
+                f"The analysis for '{metric_name}' could not be generated due to a network error. "
+                f"Your value is {metric.raw_value:.4f}, while the population norm is {metric.norm_value:.4f}. "
+                f"Your final score for this parameter is {metric.score:.1f}/10.\n\n"
+                "This is an important parameter of facial symmetry and proportion that plays a significant role in overall perception.\n\n"
+                "**IMPACT:** Harmonious values of this parameter help create a balanced, aesthetic look."
+            )
         return (
             f"Анализ метрики '{metric.name_ru}' не удалось сгенерировать из-за ошибки сети. "
             f"Твой показатель равен {metric.raw_value:.4f}, тогда как средняя норма составляет {metric.norm_value:.4f}. "
@@ -88,28 +122,43 @@ def generate_metric_text(metric: MetricResult, gender: str) -> str:
             "**ВЛИЯНИЕ:** Гармоничные значения этого показателя помогают создать сбалансированный, эстетичный образ."
         )
 
-def generate_overall_summary(result: FullAnalysisResult) -> str:
+def generate_overall_summary(result: FullAnalysisResult, lang: str = "ru") -> str:
     """
     Generates the "ОБЩЕЕ ВПЕЧАТЛЕНИЕ" block (first page summary).
     """
     top_strengths = ", ".join(result.top_strengths)
     top_weaknesses = ", ".join(result.top_weaknesses)
-    
-    user_prompt = (
-        f"Пол: {result.gender}\n"
-        f"Общий балл: {result.overall_score:.1f} из 10\n"
-        f"Сильные стороны: {top_strengths}\n"
-        f"Зоны для улучшения: {top_weaknesses}\n"
-    )
-    
+
+    if (lang or "").startswith("en"):
+        user_prompt = (
+            f"Gender: {result.gender}\n"
+            f"Overall score: {result.overall_score:.1f} out of 10\n"
+            f"Strengths: {top_strengths}\n"
+            f"Growth areas: {top_weaknesses}\n"
+        )
+    else:
+        user_prompt = (
+            f"Пол: {result.gender}\n"
+            f"Общий балл: {result.overall_score:.1f} из 10\n"
+            f"Сильные стороны: {top_strengths}\n"
+            f"Зоны для улучшения: {top_weaknesses}\n"
+        )
+
     messages = [
-        {"role": "system", "content": SUMMARY_PROMPT},
+        {"role": "system", "content": _sys(SUMMARY_PROMPT, lang)},
         {"role": "user", "content": user_prompt}
     ]
     
     try:
         return _call_openai_with_retry(messages)
     except Exception:
+        if (lang or "").startswith("en"):
+            return (
+                f"Your overall score is {result.overall_score:.1f} out of 10. "
+                f"Your standout strengths: {top_strengths}. "
+                f"The main areas for visual improvement: {top_weaknesses}. "
+                "Overall, your face has a unique set of features that can be worked on constructively."
+            )
         return (
             f"Твой общий балл составляет {result.overall_score:.1f} из 10. "
             f"Среди сильных сторон ярко выделяются: {top_strengths}. "
@@ -117,7 +166,7 @@ def generate_overall_summary(result: FullAnalysisResult) -> str:
             "В целом, твое лицо обладает уникальным набором черт, над которыми можно конструктивно работать."
         )
 
-def generate_improvement_advice(result: FullAnalysisResult) -> list[dict]:
+def generate_improvement_advice(result: FullAnalysisResult, lang: str = "ru") -> list[dict]:
     """
     Generates improvement advice for bottom 5 metrics.
     """
@@ -125,14 +174,23 @@ def generate_improvement_advice(result: FullAnalysisResult) -> list[dict]:
     sorted_metrics = sorted(result.metrics, key=lambda m: m.score)
     bottom_5 = sorted_metrics[:5]
     
+    is_en = (lang or "").startswith("en")
     metrics_info = []
     for m in bottom_5:
-        metrics_info.append(f"- {m.name_ru} (Балл: {m.score:.1f})")
-    
-    user_prompt = "Сгенерируй советы для следующих 5 метрик с наименьшими баллами:\n" + "\n".join(metrics_info)
-    
+        label = m.name_en if is_en and m.name_en else m.name_ru
+        metrics_info.append(f"- {label} ({'Score' if is_en else 'Балл'}: {m.score:.1f})")
+
+    if is_en:
+        user_prompt = (
+            "Generate advice for the following 5 lowest-scoring metrics. "
+            "Write metric_name_ru with the ENGLISH metric name and use English category names:\n"
+            + "\n".join(metrics_info)
+        )
+    else:
+        user_prompt = "Сгенерируй советы для следующих 5 метрик с наименьшими баллами:\n" + "\n".join(metrics_info)
+
     messages = [
-        {"role": "system", "content": ADVICE_PROMPT},
+        {"role": "system", "content": _sys(ADVICE_PROMPT, lang)},
         {"role": "user", "content": user_prompt}
     ]
     
@@ -153,14 +211,21 @@ def generate_improvement_advice(result: FullAnalysisResult) -> list[dict]:
         # Fallback advice
         fallback_advice = []
         for m in bottom_5:
-            fallback_advice.append({
-                "metric_name_ru": m.name_ru,
-                "category": "Общие рекомендации",
-                "advice_text": "Попробуй поэкспериментировать с ракурсами и освещением, чтобы найти наиболее выгодный угол для этой черты лица."
-            })
+            if is_en:
+                fallback_advice.append({
+                    "metric_name_ru": m.name_en or m.name_ru,
+                    "category": "General advice",
+                    "advice_text": "Experiment with camera angles and lighting to find the most flattering presentation for this facial feature."
+                })
+            else:
+                fallback_advice.append({
+                    "metric_name_ru": m.name_ru,
+                    "category": "Общие рекомендации",
+                    "advice_text": "Попробуй поэкспериментировать с ракурсами и освещением, чтобы найти наиболее выгодный угол для этой черты лица."
+                })
         return fallback_advice
 
-def generate_all_texts(result: FullAnalysisResult) -> dict:
+def generate_all_texts(result: FullAnalysisResult, lang: str = "ru") -> dict:
     """
     Orchestrator — calls all generation functions in parallel.
     """
@@ -170,14 +235,14 @@ def generate_all_texts(result: FullAnalysisResult) -> dict:
     
     with ThreadPoolExecutor(max_workers=5) as executor:
         # Submit summary job
-        future_summary = executor.submit(generate_overall_summary, result)
+        future_summary = executor.submit(generate_overall_summary, result, lang)
         
         # Submit advice job
-        future_advice = executor.submit(generate_improvement_advice, result)
+        future_advice = executor.submit(generate_improvement_advice, result, lang)
         
         # Submit metric jobs
         future_to_metric = {
-            executor.submit(generate_metric_text, metric, result.gender): metric.name 
+            executor.submit(generate_metric_text, metric, result.gender, lang): metric.name 
             for metric in result.metrics
         }
         
@@ -187,7 +252,7 @@ def generate_all_texts(result: FullAnalysisResult) -> dict:
                 metric_texts[metric_name] = future.result()
             except Exception as e:
                 logging.error(f"Error gathering result for {metric_name}: {e}")
-                metric_texts[metric_name] = "Ошибка генерации текста."
+                metric_texts[metric_name] = "Text generation error." if (lang or "").startswith("en") else "Ошибка генерации текста."
                 
         overall_summary = future_summary.result()
         advice = future_advice.result()

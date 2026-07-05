@@ -1,16 +1,16 @@
 from aiogram import Bot
 from aiogram.types import LabeledPrice
+from bot.locales import get_locale
 
-async def send_stars_invoice(bot: Bot, chat_id: int, price_stars: int):
-    """
-    Sends Telegram Stars invoice.
-    """
+async def send_stars_invoice(bot: Bot, chat_id: int, price_stars: int, lang: str = "ru"):
+    """Sends Telegram Stars invoice."""
+    L = get_locale(lang)
     await bot.send_invoice(
         chat_id=chat_id,
-        title="Разбор лица — полный анализ",
-        description="25-страничный PDF с математическим разбором 20 метрик лица",
+        title=L.INVOICE_TITLE,
+        description=L.INVOICE_DESCRIPTION,
         payload=f"analysis_{chat_id}",
         provider_token="",  # Empty for Stars
         currency="XTR",
-        prices=[LabeledPrice(label="Анализ лица", amount=price_stars)],
+        prices=[LabeledPrice(label=L.INVOICE_LABEL, amount=price_stars)],
     )

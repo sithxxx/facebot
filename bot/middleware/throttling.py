@@ -25,8 +25,10 @@ class ThrottlingMiddleware(BaseMiddleware):
             # Tell the user exactly how long is left instead of a vague "wait".
             elapsed = time.time() - self.cache[user_id]
             remaining = max(1, round(self.rate_limit - elapsed))
+            # Bilingual on purpose: fetching the user language from the DB on
+            # every throttled spam message is not worth a query.
             await event.answer(
-                f"⏱ Слишком часто. Отправь фото через {remaining} сек."
+                f"⏱ Подожди {remaining} сек / Wait {remaining} sec"
             )
             return
 

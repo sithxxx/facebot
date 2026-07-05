@@ -2,11 +2,11 @@
 {% block content %}
 <div class="page-break">
     <div class="header">
-        <h2 class="metric-title">Рекомендации по Улучшению</h2>
+        <h2 class="metric-title">{{ t.advice_title }}</h2>
     </div>
 
     <div style="margin-bottom: 30px;">
-        <p>Эти рекомендации основаны на метриках, показавших наибольший потенциал для визуального баланса. Небольшие изменения в стиле и ракурсах могут значительно улучшить общую гармонию.</p>
+        <p>{{ t.advice_intro }}</p>
     </div>
 
     {% for item in advice_items %}

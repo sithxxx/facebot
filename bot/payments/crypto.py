@@ -51,28 +51,29 @@ async def check_crypto_invoice(invoice_id: int) -> str:
                 return data["result"]["items"][0]["status"]
             return "expired"
 
-async def start_invoice_polling(bot, invoice_id: int, user_id: int, chat_id: int, photo_path: str, gender: str):
+async def start_invoice_polling(bot, invoice_id: int, user_id: int, chat_id: int, photo_path: str, gender: str, lang: str = "ru"):
     """
     Polls check_crypto_invoice() every 10 seconds.
     Timeout: 3600 seconds.
     """
     from bot.services.payment_service import process_successful_payment
-    from bot.locales.ru import CRYPTO_EXPIRED
-    
+    from bot.locales import get_locale
+    L = get_locale(lang)
+
     max_retries = 360  # 1 hour (360 * 10s)
     for _ in range(max_retries):
         try:
             status = await check_crypto_invoice(invoice_id)
             if status == "paid":
-                await process_successful_payment(bot, user_id, chat_id, method="crypto", amount="USDT", photo_path=photo_path, gender=gender)
+                await process_successful_payment(bot, user_id, chat_id, method="crypto", amount="USDT", photo_path=photo_path, gender=gender, lang=lang)
                 return
             elif status == "expired":
-                await bot.send_message(chat_id, CRYPTO_EXPIRED)
+                await bot.send_message(chat_id, L.CRYPTO_EXPIRED)
                 return
         except Exception as e:
             logger.error(f"Error polling crypto invoice {invoice_id}: {e}")
-        
+
         await asyncio.sleep(10)
-    
+
     # If timeout
-    await bot.send_message(chat_id, CRYPTO_EXPIRED)
+    await bot.send_message(chat_id, L.CRYPTO_EXPIRED)
