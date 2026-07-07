@@ -143,3 +143,8 @@ PDF_T = {
 GENDER_MALE = "👨 Мужской"
 GENDER_FEMALE = "👩 Женский"
 GENDER_CHOSEN = "Выбран пол: {gender}"
+
+SUB_BTN_SUBSCRIBE = "📢 Подписаться на канал"
+SUB_BTN_CHECK = "✅ Я подписался — проверить"
+SUB_BTN_PAY = "💳 Оплатить без подписки"
+FREE_STARTING = "🎁 Бесплатный разбор активирован! Начинаю анализ..."

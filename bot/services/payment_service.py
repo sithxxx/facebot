@@ -5,7 +5,7 @@ from aiogram.fsm.context import FSMContext
 
 from bot.database import repository
 from bot.locales import get_locale
-from bot.keyboards.subscription_kb import payment_choice_keyboard
+from bot.keyboards.subscription_kb import payment_choice_keyboard, subscription_keyboard
 from bot.config import PRICE_STARS, CARD_PRICE_RUB, CRYPTO_PRICE_USDT, is_free_user
 from bot.services.queue_service import add_job
 
@@ -37,6 +37,17 @@ async def handle_payment_flow(bot, message, user_id, state, photo_path, gender, 
         return
 
     await state.update_data(photo_path=photo_path, gender=gender, lang=lang)
+
+    # First analysis is free for NEW users (zero completed analyses, promo not
+    # used yet) — in exchange for subscribing to the channel.
+    if user and user.total_analyses == 0 and not user.subscription_used:
+        await bot.send_message(
+            chat_id=message.chat.id,
+            text=L.SUB_OFFER,
+            reply_markup=subscription_keyboard(lang),
+            parse_mode="HTML"
+        )
+        return
 
     await bot.send_message(
         chat_id=message.chat.id,

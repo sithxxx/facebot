@@ -1,16 +1,22 @@
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
-from bot.locales.ru import SUB_OFFER
+from bot.config import CHANNEL_ID
+from bot.locales import get_locale
 
-def subscription_keyboard() -> InlineKeyboardMarkup:
+
+def subscription_keyboard(lang: str = "ru") -> InlineKeyboardMarkup:
     """
-    Two buttons stacked vertically:
-    Row 1: "📢 Подписаться на канал" — url button
-    Row 2: "✅ Я подписался — проверить" — callback_data="check_subscription"
+    Free-first-analysis funnel:
+    Row 1: subscribe to the channel (url)
+    Row 2: "I subscribed — check" (verifies membership)
+    Row 3: pay without subscribing (falls through to the payment choice)
     """
+    L = get_locale(lang)
+    channel_url = f"https://t.me/{CHANNEL_ID.lstrip('@')}"
     return InlineKeyboardMarkup(
         inline_keyboard=[
-            [InlineKeyboardButton(text="📢 Подписаться на канал", url="https://t.me/twitch_s1thxxx")],
-            [InlineKeyboardButton(text="✅ Я подписался — проверить", callback_data="check_subscription")]
+            [InlineKeyboardButton(text=L.SUB_BTN_SUBSCRIBE, url=channel_url)],
+            [InlineKeyboardButton(text=L.SUB_BTN_CHECK, callback_data="check_subscription")],
+            [InlineKeyboardButton(text=L.SUB_BTN_PAY, callback_data="sub_pay")],
         ]
     )
 
